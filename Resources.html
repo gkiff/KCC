@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KCC - Resources</title>
+    <!-- Load Tailwind CSS for layout and utility classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Base styles and Background Setup */
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+        }
+
+        .bg-fixed-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background-image: url('./images/banner.jpeg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Glassmorphism Effect for Content Areas */
+        .glass-panel {
+            background: rgba(10, 15, 10, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(57, 255, 20, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        /* Glossy Digital Buttons */
+        .glossy-btn {
+            position: relative;
+            background: linear-gradient(180deg, #1a2a1a 0%, #050a05 100%);
+            border: 2px solid #39ff14;
+            color: #39ff14;
+            padding: 14px 40px;
+            border-radius: 9999px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.5), inset 0 0 15px rgba(57, 255, 20, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        /* The glass reflection on the top half of the button */
+        .glossy-btn::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            height: 45%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.02) 100%);
+            border-top-left-radius: 999px;
+            border-top-right-radius: 999px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Yellow variation (Used for Active Tabs and Accents) */
+        .glossy-btn.yellow-glow {
+            border-color: #ffff00;
+            color: #ffff00;
+            background: linear-gradient(180deg, #2a2a1a 0%, #0a0a05 100%);
+            box-shadow: 0 0 10px rgba(255, 255, 0, 0.5), inset 0 0 15px rgba(255, 255, 0, 0.3);
+        }
+
+        /* Hover Effects */
+        .glossy-btn:hover {
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.8), inset 0 0 20px rgba(57, 255, 20, 0.6);
+            text-shadow: 0 0 8px rgba(57, 255, 20, 0.8);
+            transform: translateY(-2px);
+        }
+
+        .glossy-btn.yellow-glow:hover {
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8), inset 0 0 20px rgba(255, 255, 0, 0.6);
+            text-shadow: 0 0 8px rgba(255, 255, 0, 0.8);
+        }
+
+        .glossy-btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Specific styles for tab content to handle fading/showing smoothly */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body class="text-gray-200 antialiased selection:bg-green-500 selection:text-black relative">
+
+    <!-- Fixed Background Image -->
+    <div class="bg-fixed-fullscreen"></div>
+
+    <!-- Main Wrapper -->
+    <div class="relative z-10 min-h-screen flex flex-col items-center pb-16">
+
+        <!-- Main Content Area with Glassmorphism -->
+        <main class="w-full max-w-5xl mx-auto px-4 flex-grow">
+            
+            <!-- Navigation Back to Home -->
+            <div class="mb-6">
+                <a href="KCC-Home.html" class="text-green-400 hover:text-yellow-300 transition-colors flex items-center gap-2 font-medium">
+                    ← Back to Home
+                </a>
+            </div>
+
+            <div class="glass-panel rounded-3xl p-8 sm:p-12 text-center">
+
+                <h1 class="text-3xl sm:text-5xl font-bold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#39ff14] to-[#ffff00] drop-shadow-lg">
+                    Computing Resources
+                </h1>
+                
+                <div class="w-24 h-1 bg-gradient-to-r from-green-500 to-yellow-400 mx-auto mb-10 rounded-full shadow-[0_0_10px_rgba(57,255,20,0.5)]"></div>
+
+                <!-- Tab Navigation Buttons -->
+                <div class="flex flex-wrap justify-center gap-4 mb-10 border-b border-green-900/50 pb-8">
+                    <!-- The active tab uses the 'yellow-glow' class -->
+                    <button class="glossy-btn tab-btn yellow-glow px-8 py-3" onclick="openTab(event, 'ks3')">KS3</button>
+                    <button class="glossy-btn tab-btn px-8 py-3" onclick="openTab(event, 'ks4')">KS4</button>
+                    <button class="glossy-btn tab-btn px-8 py-3" onclick="openTab(event, 'ks5')">KS5</button>
+                </div>
+
+                <!-- KS3 Tab Content -->
+                <div id="ks3" class="tab-content" style="display: block;">
+                    <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 3 Resources</h2>
+                    <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                        Foundational computing resources for Years 7-9. Discover introductory programming, digital literacy, and basic computer science concepts.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Placeholder Buttons for KS3 -->
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Yr 7 Scratch Projects</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Yr 8 Python Intro</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Yr 9 Web Dev Basics</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Hardware Worksheets</a>
+                    </div>
+                </div>
+
+                <!-- KS4 Tab Content -->
+                <div id="ks4" class="tab-content">
+                    <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 4 (GCSE) Resources</h2>
+                    <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                        Core materials tailored for GCSE Computer Science. Explore algorithms, data representation, and intermediate programming challenges.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Placeholder Buttons for KS4 -->
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Algorithm Cheatsheets</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">C# Starter Tasks</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Past Paper Breakdowns</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Networking Guides</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Data Representation</a>
+                    </div>
+                </div>
+
+                <!-- KS5 Tab Content -->
+                <div id="ks5" class="tab-content">
+                    <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 5 (A Level & IB) Resources</h2>
+                    <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
+                        Advanced computing resources for A Level and IB students. Deep dives into complex data structures, object-oriented programming, and NEA project support.
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Placeholder Buttons for KS5 -->
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">OOP in C#</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Data Structures</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">NEA Project Planning</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Assembly Language</a>
+                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Boolean Algebra</a>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- Minimal Footer -->
+        <footer class="mt-16 text-center text-sm text-gray-500 glass-panel px-8 py-4 rounded-full">
+            &copy; 2026 Kiffies Computing Collective. All rights reserved.
+        </footer>
+    </div>
+
+    <!-- JavaScript for Tab Functionality -->
+    <script>
+        function openTab(evt, tabId) {
+            // 1. Hide all elements with class="tab-content"
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+
+            // 2. Remove the "yellow-glow" class from all tab buttons
+            const tabButtons = document.getElementsByClassName("tab-btn");
+            for (let i = 0; i < tabButtons.length; i++) {
+                tabButtons[i].classList.remove("yellow-glow");
+            }
+
+            // 3. Show the current tab, and add an "active" (yellow-glow) class to the button that opened the tab
+            document.getElementById(tabId).style.display = "block";
+            evt.currentTarget.classList.add("yellow-glow");
+        }
+    </script>
+</body>
+
+</html>
