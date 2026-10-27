@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr. Kiff's Pile-O-80s-Tiles</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #090a0f;
+      color: #00ffff;
+      font-family: 'Press Start 2P', monospace;
+      text-align: center;
+      margin: 0;
+      padding: 20px;
+      text-shadow: 0 0 5px #00ffff;
+    }
+
+    h1 {
+      color: #ff00ff;
+      text-shadow: 0 0 10px #ff00ff, 0 0 20px #ff00ff;
+      font-size: 1.5rem;
+      line-height: 1.5;
+      margin-bottom: 30px;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      min-width: 900px;
+      /* Forces enough width for side-by-side layout */
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: #111424;
+      border: 2px solid #ff00ff;
+      box-shadow: 0 0 10px #ff00ff;
+      padding: 20px;
+      border-radius: 8px;
+
+      /* STRICT FIXED DIMENSIONS TO PREVENT MOVEMENT */
+      width: 420px;
+      height: 450px;
+      box-sizing: border-box;
+      flex-shrink: 0;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(6, 50px);
+      grid-template-rows: repeat(6, 50px);
+      /* Lock row heights */
+      gap: 12px;
+      justify-content: center;
+      align-content: center;
+    }
+
+    .pile {
+      width: 50px;
+      height: 50px;
+      background: #090a0f;
+      border: 2px solid #00ffff;
+      color: #00ffff;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.8rem;
+      cursor: pointer;
+      box-shadow: 0 0 8px #00ffff;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+
+    .pile:hover:not(:disabled) {
+      background: #00ffff;
+      color: #090a0f;
+      box-shadow: 0 0 15px #00ffff;
+    }
+
+    .pile:disabled {
+      border-color: #333;
+      color: #333;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .pile.selected {
+      border-color: #ff00ff;
+      color: #ff00ff;
+      background: #2a0a2a;
+      box-shadow: 0 0 15px #ff00ff;
+      font-size: 1.2rem;
+    }
+
+    .status-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      text-align: left;
+    }
+
+    .status {
+      margin: 20px 0;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    .score {
+      color: #ff00ff;
+      text-shadow: 0 0 5px #ff00ff;
+    }
+
+    #message {
+      color: #ffff00;
+      text-shadow: 0 0 5px #ffff00;
+      height: 60px;
+      /* Lock height for text changes */
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Mr. Kiff's Pile-O-80s-Tiles</h1>
+
+  <div class="game-container">
+    <!-- Left Panel: Game Board -->
+    <div class="panel">
+      <div id="grid"></div>
+    </div>
+
+    <!-- Right Panel: Scores & Logs -->
+    <div class="panel">
+      <div class="status-container">
+        <div class="status" id="message">Player 1, select your first pile.</div>
+        <div class="status" id="turn-indicator">Turn: Player 1</div>
+        <div class="status score" id="score-p1">Player 1: 0</div>
+        <div class="status score" id="score-p2">Player 2: 0</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const symbols = ['🕹️', '📼', '🎸', '💾', '👾', '🎹', '🎧', '🛹', '⚡'];
+    let deck = [];
+
+    symbols.forEach((sym, idx) => {
+      for (let i = 0; i < 12; i++) {
+        deck.push({ symbol: sym, points: (idx + 1) * 10 });
+      }
+    });
+
+    deck.sort(() => Math.random() - 0.5);
+
+    let board = [];
+    for (let i = 0; i < 36; i++) {
+      board.push([deck.pop(), deck.pop(), deck.pop()]);
+    }
+
+    let players = [{ name: 'Player 1', score: 0 }, { name: 'Player 2', score: 0 }];
+    let turn = 0;
+    let selected = [];
+    let lockBoard = false;
+
+    const gridEl = document.getElementById('grid');
+    const msgEl = document.getElementById('message');
+    const turnEl = document.getElementById('turn-indicator');
+    const scoreP1 = document.getElementById('score-p1');
+    const scoreP2 = document.getElementById('score-p2');
+
+    function updateUI() {
+      gridEl.innerHTML = '';
+      board.forEach((pile, index) => {
+        const btn = document.createElement('button');
+        btn.className = 'pile';
+
+        if (selected.includes(index)) {
+          btn.classList.add('selected');
+          btn.innerText = pile[pile.length - 1].symbol;
+        } else {
+          btn.innerText = pile.length > 0 ? pile.length : '';
+        }
+
+        if (pile.length === 0) btn.disabled = true;
+
+        btn.onclick = () => selectPile(index);
+        gridEl.appendChild(btn);
+      });
+
+      turnEl.innerText = `Turn: ${players[turn].name}`;
+      scoreP1.innerText = `${players[0].name}: ${players[0].score}`;
+      scoreP2.innerText = `${players[1].name}: ${players[1].score}`;
+    }
+
+    function selectPile(index) {
+      if (lockBoard || board[index].length === 0 || selected.includes(index)) return;
+
+      selected.push(index);
+      updateUI();
+
+      if (selected.length === 1) {
+        msgEl.innerText = `${players[turn].name},\nselect your second pile.`;
+      } else if (selected.length === 2) {
+        lockBoard = true;
+        let p1 = selected[0];
+        let p2 = selected[1];
+        let t1 = board[p1][board[p1].length - 1];
+        let t2 = board[p2][board[p2].length - 1];
+
+        if (t1.symbol === t2.symbol) {
+          let pts = t1.points + t2.points;
+          msgEl.innerText = `Radical!\nMatch found. +${pts} pts.`;
+          players[turn].score += pts;
+
+          setTimeout(() => {
+            board[p1].pop();
+            board[p2].pop();
+            selected = [];
+            lockBoard = false;
+            checkWin();
+            updateUI();
+            if (!board.every(p => p.length === 0)) {
+              msgEl.innerText = `${players[turn].name}'s turn continues!`;
+            }
+          }, 1500);
+        } else {
+          msgEl.innerText = `Bummer!\nNo match.`;
+
+          setTimeout(() => {
+            turn = (turn + 1) % 2;
+            selected = [];
+            lockBoard = false;
+            updateUI();
+            msgEl.innerText = `${players[turn].name},\nselect your first pile.`;
+          }, 1500);
+        }
+      }
+    }
+
+    function checkWin() {
+      if (board.every(pile => pile.length === 0)) {
+        let winner;
+        if (players[0].score > players[1].score) winner = players[0].name;
+        else if (players[1].score > players[0].score) winner = players[1].name;
+        else winner = "Nobody, it's a tie";
+
+        msgEl.innerText = `Game Over!\n${winner} wins!`;
+        lockBoard = true;
+      }
+    }
+
+    updateUI();
+  </script>
+</body>
+
+</html>
