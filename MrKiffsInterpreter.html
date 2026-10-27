@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. Kiff's Cambridge 0984 IGCSE Pseudocode Interpreter</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar for a polished look */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1f2937; }
+        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+        
+        .code-editor, .console-output {
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+        }
+
+        /* Modal transitions */
+        .modal-enter { opacity: 0; transform: scale(0.95); }
+        .modal-enter-active { opacity: 1; transform: scale(1); transition: opacity 0.2s, transform 0.2s; }
+        .modal-exit { opacity: 1; transform: scale(1); }
+        .modal-exit-active { opacity: 0; transform: scale(0.95); transition: opacity 0.2s, transform 0.2s; }
+
+        /* Syntax Highlighting Colors (VS Code Dark Modern) */
+        .syn-keyword-pink { color: #c586c0; font-weight: 500; }
+        .syn-keyword-blue { color: #569cd6; font-weight: 500; }
+        .syn-datatype { color: #4ec9b0; }
+        .syn-string { color: #ce9178; }
+        .syn-function { color: #dcdcaa; }
+        .syn-comment { color: #6a9955; }
+        .syn-operator { color: #d4d4d4; }
+        
+        #editor, #highlighting-content, #dataEditor {
+            font-family: 'Consolas', 'Courier New', Courier, monospace;
+            font-size: 15px;
+            line-height: 1.5;
+            tab-size: 4;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 h-screen flex flex-col overflow-hidden selection:bg-blue-500 selection:text-white">
+
+    <!-- Top Toolbar -->
+    <header class="bg-gray-800 border-b border-gray-700 p-4 flex justify-between items-center shadow-md z-10">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            <h1 class="text-xl font-bold tracking-wider text-gray-100"><span class="text-yellow-400">Mr. Kiff's</span> 0984 IGCSE <span class="text-blue-400">Interpreter</span></h1>
+        </div>
+        <div class="flex gap-4">
+            <button onclick="openHelp()" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded shadow transition-colors duration-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                Help
+            </button>
+            <button onclick="runCode()" class="px-6 py-2 bg-green-600 hover:bg-green-500 text-white font-bold rounded shadow transition-colors duration-200 flex items-center gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"></path></svg>
+                Run
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col md:flex-row overflow-hidden">
+        <!-- Editor Section -->
+        <section class="w-full md:w-1/2 h-full flex flex-col border-r border-gray-700 bg-gray-900">
+            <div class="bg-gray-800 text-gray-400 text-xs flex">
+                <button id="tab-code" onclick="switchTab('code')" class="px-4 py-2 uppercase tracking-widest font-semibold bg-gray-900 text-blue-400 border-t-2 border-blue-500 outline-none transition-colors">Code</button>
+                <button id="tab-data" onclick="switchTab('data')" class="px-4 py-2 uppercase tracking-widest font-semibold hover:text-white outline-none border-t-2 border-transparent transition-colors">Data.txt</button>
+            </div>
+            
+            <div id="codeEditorWrapper" class="relative flex-1 w-full bg-[#1e1e1e] overflow-hidden">
+                <pre id="highlighting-content" class="absolute inset-0 pointer-events-none p-4 m-0 overflow-hidden whitespace-pre-wrap break-words text-[#d4d4d4]" aria-hidden="true"></pre>
+                <textarea id="editor" class="absolute inset-0 bg-transparent text-transparent caret-white p-4 m-0 outline-none resize-none overflow-auto whitespace-pre-wrap break-words w-full h-full" spellcheck="false" oninput="updateHighlighting()" onscroll="syncScroll()">// Write your IGCSE pseudocode here...
+DECLARE Name : STRING
+OUTPUT "What is your name?"
+INPUT Name
+OUTPUT "Hello ", Name</textarea>
+            </div>
+
+            <textarea id="dataEditor" class="hidden flex-1 w-full bg-[#1e1e1e] text-[#d4d4d4] p-4 outline-none resize-none" spellcheck="false" placeholder="Paste your data here...
+
+// Example of reading this data in your code:
+// DECLARE FileData : STRING
+// OPENFILE &quot;Data.txt&quot; FOR READ
+// READFILE &quot;Data.txt&quot;, FileData
+// OUTPUT FileData
+// CLOSEFILE &quot;Data.txt&quot;"></textarea>
+        </section>
+
+        <!-- Console -->
+        <section class="w-full md:w-1/2 h-full flex flex-col bg-black">
+            <div class="bg-gray-800 text-gray-400 text-xs px-4 py-1 uppercase tracking-widest font-semibold flex justify-between">
+                <span>Console Output</span>
+                <button onclick="clearConsole()" class="hover:text-white transition-colors">Clear</button>
+            </div>
+            <div id="console" class="console-output flex-1 w-full p-4 overflow-y-auto text-green-400">
+                <span class="text-gray-600 italic">// Output will appear here...</span><br>
+            </div>
+        </section>
+    </main>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden justify-center items-center z-50">
+        <div class="bg-gray-800 rounded-lg shadow-xl w-11/12 max-w-3xl max-h-[80vh] flex flex-col border border-gray-700 overflow-hidden transform transition-all">
+            <div class="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900">
+                <h2 class="text-xl font-bold text-blue-400">IGCSE 0984 Pseudocode Reference</h2>
+                <button onclick="closeHelp()" class="text-gray-400 hover:text-white">&times; Close</button>
+            </div>
+            <div class="p-6 overflow-y-auto text-sm text-gray-300 space-y-4">
+                <p>This interpreter translates standard Cambridge 0984 pseudocode into executable logic. Below are supported structures:</p>
+                
+                <div><h3 class="text-white font-bold mb-1">Variables & Constants</h3>
+                <pre class="bg-gray-900 p-2 rounded text-blue-300 border border-gray-700">DECLARE &lt;identifier&gt; : &lt;data type&gt;
+CONSTANT &lt;identifier&gt; = &lt;value&gt;
+&lt;identifier&gt; &lt;- &lt;value&gt;  // Assignment</pre></div>
+
+                <div><h3 class="text-white font-bold mb-1">Input / Output</h3>
+                <pre class="bg-gray-900 p-2 rounded text-blue-300 border border-gray-700">INPUT &lt;identifier&gt;
+OUTPUT &lt;value1&gt;, &lt;value2&gt;, ...</pre></div>
+
+                <div><h3 class="text-white font-bold mb-1">Selection (IF/ELSE & CASE)</h3>
+                <pre class="bg-gray-900 p-2 rounded text-blue-300 border border-gray-700">IF &lt;condition&gt; THEN
+    // statements
+ELSE
+    // statements
+ENDIF
+
+CASE OF &lt;identifier&gt;
+    &lt;value1&gt; : &lt;statement&gt;
+    OTHERWISE &lt;statement&gt;
+ENDCASE</pre></div>
+
+                <div><h3 class="text-white font-bold mb-1">Iteration (Loops)</h3>
+                <pre class="bg-gray-900 p-2 rounded text-blue-300 border border-gray-700">FOR &lt;identifier&gt; &lt;- &lt;val1&gt; TO &lt;val2&gt;
+    // statements
+NEXT &lt;identifier&gt;
+
+REPEAT
+    // statements
+UNTIL &lt;condition&gt;
+
+WHILE &lt;condition&gt; DO
+    // statements
+ENDWHILE</pre></div>
+
+                <div><h3 class="text-white font-bold mb-1">Operators</h3>
+                <p class="text-xs">Arithmetic: <code>+ - * / MOD DIV</code><br>
+                Relational: <code>= &lt; &gt; &lt;= &gt;= &lt;&gt;</code><br>
+                Logical: <code>AND OR NOT</code></p></div>
+
+                <div><h3 class="text-white font-bold mb-1">Built-in Functions (Strings & Math)</h3>
+                <pre class="bg-gray-900 p-2 rounded text-blue-300 border border-gray-700">LENGTH(str), LCASE(str), UCASE(str)
+SUBSTRING(str, start, length)
+DIV(a, b), MOD(a, b)</pre></div>
+                
+                <hr class="border-gray-700 my-6">
+                <h2 class="text-lg font-bold text-yellow-400 mb-2">Working Code Examples</h2>
+                <p class="text-sm mb-4">Click to expand and copy these snippets into the Code tab.</p>
+
+                <div class="space-y-2">
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">1. Simple INPUT / OUTPUT (REAL data type)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">DECLARE MyNumber : REAL
+MyNumber <- 3.14
+OUTPUT "The value of my number is ", MyNumber</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">2. SELECTION (IF / ELSE)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">DECLARE Age : INTEGER
+OUTPUT "Enter your age:"
+INPUT Age
+
+IF Age >= 18 THEN
+    OUTPUT "You are an adult."
+ELSE
+    OUTPUT "You are a minor."
+ENDIF</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">3. ITERATION (FOR, WHILE, REPEAT)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">// FOR Loop
+DECLARE Counter : INTEGER
+FOR Counter <- 1 TO 3
+    OUTPUT "Count is: ", Counter
+NEXT Counter
+
+// WHILE Loop
+DECLARE Number : INTEGER
+Number <- 3
+WHILE Number > 0 DO
+    OUTPUT "Countdown: ", Number
+    Number <- Number - 1
+ENDWHILE
+
+// REPEAT Loop
+DECLARE Password : STRING
+REPEAT
+    OUTPUT "Enter password:"
+    INPUT Password
+UNTIL Password = "Secret"
+OUTPUT "Access granted!"</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">4. ARRAYS (1D & 2D)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">// 1D Array
+DECLARE Scores : ARRAY[1:3] OF INTEGER
+Scores[1] <- 100
+OUTPUT "First score is: ", Scores[1]
+
+// 2D Array (3x3 Grid)
+DECLARE Board : ARRAY[1:3, 1:3] OF CHAR
+DECLARE Row : INTEGER
+DECLARE Col : INTEGER
+
+FOR Row <- 1 TO 3
+    FOR Col <- 1 TO 3
+        Board[Row, Col] <- '.'
+    NEXT Col
+NEXT Row
+
+Board[2, 2] <- 'X'
+OUTPUT "Center of grid is: ", Board[2, 2]</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">5. FILE HANDLING (Write & Read)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">DECLARE WriteText : STRING
+DECLARE ReadText : STRING
+
+// Write to virtual file
+OPENFILE "MyFile.txt" FOR WRITE
+WriteText <- "Hello, virtual file!"
+WRITEFILE "MyFile.txt", WriteText
+CLOSEFILE "MyFile.txt"
+
+// Read from virtual file
+OPENFILE "MyFile.txt" FOR READ
+READFILE "MyFile.txt", ReadText
+CLOSEFILE "MyFile.txt"
+
+OUTPUT "Data retrieved: ", ReadText</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">6. LIBRARY ROUTINES (RANDOM & ROUND)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">DECLARE RandomReal : REAL
+DECLARE DiceRoll : INTEGER
+
+// Generate random real number between 0 and 1
+RandomReal <- RANDOM()
+OUTPUT "Raw Random Number: ", RandomReal
+
+// Generate a random integer between 1 and 6 (Dice Roll)
+// 1. RANDOM() * 5 generates a range from 0 to 5.999...
+// 2. Adding 1 shifts the range to 1 to 6.999...
+// 3. ROUND(..., 0) removes decimals to leave 1, 2, 3, 4, 5, or 6
+DiceRoll <- ROUND((RANDOM() * 5) + 1, 0)
+
+OUTPUT "You rolled a ", DiceRoll</pre>
+                    </details>
+
+                    <details class="bg-gray-900 border border-gray-700 rounded p-3 cursor-pointer">
+                        <summary class="font-bold text-white select-none hover:text-blue-400 transition-colors">7. STRING & MATH FUNCTIONS (LCASE, UCASE, SUBSTRING, MOD, DIV)</summary>
+                        <pre class="mt-3 text-blue-300 text-xs overflow-x-auto">DECLARE Phrase : STRING
+Phrase <- "Computer Science"
+
+// String Functions
+OUTPUT "Uppercase: ", UCASE(Phrase)
+OUTPUT "Length: ", LENGTH(Phrase)
+OUTPUT "First Word: ", SUBSTRING(Phrase, 1, 8)
+
+// Math Functions (DIV and MOD)
+// 10 DIV 3 gives 3, 10 MOD 3 gives 1
+OUTPUT "10 divided by 3 is ", DIV(10, 3), " remainder ", MOD(10, 3)</pre>
+                    </details>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Box Modal (replaces alerts) -->
+    <div id="msgModal" class="fixed inset-0 bg-black/60 hidden justify-center items-center z-50">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl w-96 border border-red-500">
+            <h3 class="text-red-400 font-bold mb-2">Notice</h3>
+            <p id="msgContent" class="text-gray-300 mb-4 text-sm"></p>
+            <button onclick="closeMsg()" class="w-full bg-gray-700 hover:bg-gray-600 text-white py-2 rounded">Dismiss</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Syntax Highlighting ---
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        function updateHighlighting() {
+            let text = document.getElementById('editor').value;
+            // Pad final newline to ensure the scroll area matches perfectly
+            if (text.length > 0 && text[text.length - 1] === '\n') { text += ' '; }
+
+            let html = '';
+            // Regex Tokenizer: 1. Comments, 2. Strings, 3. Words, 4. Operators
+            const regex = /(\/\/.*)|(".*?"|'.*?')|\b([a-zA-Z_]\w*)\b|(<-|<=|>=|<>|=|<|>|\+|-|\*|\/|\^|\bMOD\b|\bDIV\b|\bAND\b|\bOR\b|\bNOT\b)/g;
+            let lastIndex = 0;
+
+            text.replace(regex, (match, comment, string, word, operator, offset) => {
+                // Catch up any unmatched regular text
+                html += escapeHtml(text.slice(lastIndex, offset));
+                lastIndex = offset + match.length;
+
+                if (comment) {
+                    html += `<span class="syn-comment">${escapeHtml(comment)}</span>`;
+                } else if (string) {
+                    html += `<span class="syn-string">${escapeHtml(string)}</span>`;
+                } else if (word) {
+                    const wUpper = word.toUpperCase();
+                    // Pink Control Keywords
+                    if (["IF","THEN","ELSE","ENDIF","FOR","TO","STEP","NEXT","WHILE","DO","ENDWHILE","REPEAT","UNTIL","CASE","OF","OTHERWISE","ENDCASE","RETURN","RETURNS"].includes(wUpper)) {
+                        html += `<span class="syn-keyword-pink">${escapeHtml(word)}</span>`;
+                    } 
+                    // Dark Blue Declaration Keywords
+                    else if (["DECLARE","CONSTANT"].includes(wUpper)) {
+                        html += `<span class="syn-keyword-blue">${escapeHtml(word)}</span>`;
+                    } 
+                    // Teal Data Types
+                    else if (["INTEGER","REAL","CHAR","STRING","BOOLEAN","ARRAY","OF"].includes(wUpper)) {
+                        html += `<span class="syn-datatype">${escapeHtml(word)}</span>`;
+                    } 
+                    // Yellow Functions / Built-in Procedures
+                    else if (["FUNCTION","ENDFUNCTION","PROCEDURE","ENDPROCEDURE","INPUT","OUTPUT","OPENFILE","READFILE","WRITEFILE","CLOSEFILE","LENGTH","LCASE","UCASE","SUBSTRING","ROUND","RANDOM"].includes(wUpper)) {
+                        html += `<span class="syn-function">${escapeHtml(word)}</span>`;
+                    } 
+                    // Check if it's a custom function call (a word followed by an opening parenthesis)
+                    else {
+                        const nextChar = text.slice(lastIndex).match(/^\s*\(/);
+                        if (nextChar) {
+                            html += `<span class="syn-function">${escapeHtml(word)}</span>`;
+                        } else {
+                            html += escapeHtml(word); // Normal variable (Light Gray by default)
+                        }
+                    }
+                } else if (operator) {
+                    html += `<span class="syn-operator">${escapeHtml(operator)}</span>`;
+                }
+                return match;
+            });
+            // Append any remaining text
+            html += escapeHtml(text.slice(lastIndex));
+            document.getElementById('highlighting-content').innerHTML = html;
+        }
+
+        // Keep the visible syntax layer perfectly scrolled with the invisible textarea
+        function syncScroll() {
+            const textarea = document.getElementById('editor');
+            const pre = document.getElementById('highlighting-content');
+            pre.scrollTop = textarea.scrollTop;
+            pre.scrollLeft = textarea.scrollLeft;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateHighlighting(); // Run syntax highlight on page load
+            
+            // Allow Tab key to indent rather than jumping out of the editor
+            document.getElementById('editor').addEventListener('keydown', function(e) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    const start = this.selectionStart;
+                    const end = this.selectionEnd;
+                    this.value = this.value.substring(0, start) + "    " + this.value.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 4;
+                    updateHighlighting();
+                }
+            });
+        });
+
+        // --- UI Interactions ---
+        function switchTab(tab) {
+            const codeTab = document.getElementById('tab-code');
+            const dataTab = document.getElementById('tab-data');
+            const codeEditorWrapper = document.getElementById('codeEditorWrapper');
+            const dataEditor = document.getElementById('dataEditor');
+
+            if (tab === 'code') {
+                codeTab.className = "px-4 py-2 uppercase tracking-widest font-semibold bg-gray-900 text-blue-400 border-t-2 border-blue-500 outline-none transition-colors";
+                dataTab.className = "px-4 py-2 uppercase tracking-widest font-semibold hover:text-white outline-none border-t-2 border-transparent transition-colors";
+                codeEditorWrapper.classList.remove('hidden');
+                dataEditor.classList.add('hidden');
+            } else {
+                dataTab.className = "px-4 py-2 uppercase tracking-widest font-semibold bg-gray-900 text-yellow-400 border-t-2 border-yellow-500 outline-none transition-colors";
+                codeTab.className = "px-4 py-2 uppercase tracking-widest font-semibold hover:text-white outline-none border-t-2 border-transparent transition-colors";
+                dataEditor.classList.remove('hidden');
+                codeEditorWrapper.classList.add('hidden');
+            }
+        }
+
+        function openHelp() { document.getElementById('helpModal').classList.replace('hidden', 'flex'); }
+        function closeHelp() { document.getElementById('helpModal').classList.replace('flex', 'hidden'); }
+        function showMessage(msg) {
+            document.getElementById('msgContent').innerText = msg;
+            document.getElementById('msgModal').classList.replace('hidden', 'flex');
+        }
+        function closeMsg() { document.getElementById('msgModal').classList.replace('flex', 'hidden'); }
+        function clearConsole() { document.getElementById('console').innerHTML = ''; }
+
+        // --- Custom Async Input (Inline in Console) ---
+        function requestInput(varName) {
+            return new Promise((resolve) => {
+                const cons = document.getElementById('console');
+                
+                const line = document.createElement('div');
+                line.className = "flex items-center gap-2 mt-1 mb-1 text-sm font-mono";
+                
+                const promptMsg = document.createElement('span');
+                promptMsg.className = "text-yellow-400";
+                promptMsg.innerText = `[INPUT] ${varName}:`;
+                
+                const inputField = document.createElement('input');
+                inputField.type = "text";
+                inputField.className = "bg-transparent border-b border-gray-600 text-white outline-none flex-1 focus:border-blue-400 font-mono px-1";
+                inputField.autocomplete = "off";
+                
+                line.appendChild(promptMsg);
+                line.appendChild(inputField);
+                cons.appendChild(line);
+                cons.scrollTop = cons.scrollHeight;
+                
+                // Focus the input automatically
+                setTimeout(() => inputField.focus(), 50);
+                
+                inputField.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        const val = inputField.value;
+                        
+                        // Replace the input field with static text once submitted
+                        const textNode = document.createElement('span');
+                        textNode.className = "text-blue-300 font-bold";
+                        textNode.innerText = val;
+                        line.replaceChild(textNode, inputField);
+                        
+                        resolve(val);
+                    }
+                });
+            });
+        }
+
+        // --- Virtual File System ---
+        let vfs = {};
+        let filePointers = {};
+
+        function openFile(filename, mode) {
+            let fn = filename.toLowerCase();
+            if (mode === 'WRITE') {
+                vfs[fn] = []; // Creates or overwrites the file
+            } else if (mode === 'APPEND') {
+                if (!vfs[fn]) vfs[fn] = []; // Create if it doesn't exist, otherwise keep data
+            } else if (mode === 'READ') {
+                if (!vfs[fn]) vfs[fn] = []; // Create empty if it doesn't exist
+                filePointers[fn] = 0; // Reset read pointer to the top
+            }
+        }
+
+        function readFile(filename) {
+            let fn = filename.toLowerCase();
+            if (vfs[fn] && filePointers[fn] < vfs[fn].length) {
+                let val = vfs[fn][filePointers[fn]++];
+                return val;
+            }
+            return ""; // Return empty string if end of file
+        }
+
+        function writeFile(filename, data) {
+            let fn = filename.toLowerCase();
+            if (!vfs[fn]) vfs[fn] = [];
+            vfs[fn].push(data);
+        }
+
+        function closeFile(filename) {
+            let fn = filename.toLowerCase();
+            delete filePointers[fn]; // Clean up the lock/pointer
+        }
+
+        // --- Library Routines ---
+        function RANDOM() {
+            return Math.random(); // Returns a random real number between 0 and 1
+        }
+
+        function ROUND(value, places) {
+            // Ensures accurate rounding to the specified decimal places
+            return Number(Math.round(value + 'e' + places) + 'e-' + places);
+        }
+
+        // String Operations
+        function LENGTH(str) { return str ? str.toString().length : 0; }
+        function LCASE(str) { return str ? str.toString().toLowerCase() : ""; }
+        function UCASE(str) { return str ? str.toString().toUpperCase() : ""; }
+        function SUBSTRING(str, start, len) { 
+            // Pseudocode 1-based indexing to JavaScript 0-based indexing
+            return str ? str.toString().substring(start - 1, start - 1 + len) : ""; 
+        }
+
+        // Math Routines (Functional usage)
+        function DIV(a, b) { return Math.floor(a / b); }
+        function MOD(a, b) { return a % b; }
+
+        // --- Interpreter Logic ---
+        function printToConsole(...args) {
+            const cons = document.getElementById('console');
+            const line = document.createElement('div');
+            // Safely map arguments to strings to handle variables seamlessly
+            let outputText = args.map(a => a !== undefined && a !== null ? a.toString() : '').join('');
+            line.innerText = outputText;
+            cons.appendChild(line);
+            cons.scrollTop = cons.scrollHeight;
+        }
+
+        async function runCode() {
+            clearConsole();
+            const code = document.getElementById('editor').value;
+            if (!code.trim()) return;
+
+            // Pre-load Data.txt from the UI into the Virtual File System
+            const dataContent = document.getElementById('dataEditor').value;
+            vfs["data.txt"] = dataContent ? dataContent.split('\n') : [];
+
+            try {
+                // Transpiler: Pseudocode -> Async JavaScript
+                let jsCode = "";
+                let openBlocks = 0;
+                const lines = code.split('\n');
+                
+                // Helper to safely convert pseudocode conditions to JS without breaking >= and <=
+                const parseCond = (c) => c.replace(/<>/g, '!==')
+                                          .replace(/<=/g, '@@LE@@')
+                                          .replace(/>=/g, '@@GE@@')
+                                          .replace(/=/g, '===')
+                                          .replace(/@@LE@@/g, '<=')
+                                          .replace(/@@GE@@/g, '>=')
+                                          .replace(/\bAND\b/gi, '&&')
+                                          .replace(/\bOR\b/gi, '||')
+                                          .replace(/\bNOT\b/gi, '!');
+                
+                for (let i = 0; i < lines.length; i++) {
+                    let line = lines[i].trim();
+                    if (!line || line.startsWith('//')) continue; // Skip empty/comments
+
+                    // --- Array 2D Syntax Converter ---
+                    // Converts Pseudocode Board[Row, Col] into JavaScript Board[Row][Col]
+                    // We skip DECLARE lines so the array dimensions aren't accidentally split!
+                    if (!line.match(/^DECLARE/i)) {
+                        line = line.replace(/([a-zA-Z0-9_]+)\s*\[\s*([^,\]]+)\s*,\s*([^,\]]+)\s*\]/g, '$1[$2][$3]');
+                    }
+
+                    // Transpile commands
+                    if (line.match(/^DECLARE\s+([a-zA-Z0-9_]+)\s*:\s*ARRAY/i)) {
+                        const m = line.match(/^DECLARE\s+([a-zA-Z0-9_]+)\s*:\s*ARRAY\s*\[(.*?)\]/i);
+                        if (m) {
+                            const varName = m[1];
+                            const bounds = m[2];
+                            
+                            // Helper to extract the upper bound (e.g., "1:30" -> "30")
+                            const parseBound = (bStr) => {
+                                const p = bStr.split(':');
+                                return p.length > 1 ? p[1].trim() : p[0].trim();
+                            };
+                            
+                            if (bounds.includes(',')) {
+                                // 2D Array
+                                const parts = bounds.split(',');
+                                const upper1 = parseBound(parts[0]);
+                                const upper2 = parseBound(parts[1]);
+                                // Pad by 1 to safely support 1-based indexing
+                                jsCode += `let ${varName} = Array.from({length: (parseInt(${upper1}) || 100) + 1}, () => new Array((parseInt(${upper2}) || 100) + 1));\n`;
+                            } else {
+                                // 1D Array
+                                const upper = parseBound(bounds);
+                                jsCode += `let ${varName} = new Array((parseInt(${upper}) || 100) + 1);\n`;
+                            }
+                        }
+                    }
+                    else if (line.match(/^DECLARE\s+([a-zA-Z0-9_]+)/i)) {
+                        const match = line.match(/^DECLARE\s+([a-zA-Z0-9_]+)/i);
+                        jsCode += `let ${match[1]};\n`;
+                    }
+                    else if (line.match(/^CONSTANT\s+([a-zA-Z0-9_]+)\s*=\s*(.+)/i)) {
+                        const match = line.match(/^CONSTANT\s+([a-zA-Z0-9_]+)\s*=\s*(.+)/i);
+                        jsCode += `const ${match[1]} = ${match[2]};\n`;
+                    }
+                    else if (line.match(/^OUTPUT\s+(.+)/i)) {
+                        const match = line.match(/^OUTPUT\s+(.+)/i);
+                        // Let standard JS evaluation handle string commas & concatenation
+                        jsCode += `printToConsole(${match[1]});\n`;
+                    }
+                    else if (line.match(/^INPUT\s+(.+)/i)) {
+                        const match = line.match(/^INPUT\s+(.+)/i);
+                        let varTarget = match[1].trim();
+                        jsCode += `${varTarget} = await requestInput("${varTarget}");\n`;
+                        jsCode += `if (typeof ${varTarget} === 'string' && ${varTarget}.trim() !== '' && !isNaN(${varTarget})) ${varTarget} = Number(${varTarget});\n`; 
+                    }
+                    // --- File Handling Transpilation ---
+                    else if (line.match(/^OPENFILE\s+"([^"]+)"\s+FOR\s+(READ|WRITE|APPEND)/i)) {
+                        const match = line.match(/^OPENFILE\s+"([^"]+)"\s+FOR\s+(READ|WRITE|APPEND)/i);
+                        jsCode += `openFile("${match[1]}", "${match[2].toUpperCase()}");\n`;
+                    }
+                    else if (line.match(/^READFILE\s+"([^"]+)"\s*,\s*([a-zA-Z0-9_]+)/i)) {
+                        const match = line.match(/^READFILE\s+"([^"]+)"\s*,\s*([a-zA-Z0-9_]+)/i);
+                        jsCode += `${match[2]} = readFile("${match[1]}");\n`;
+                    }
+                    else if (line.match(/^WRITEFILE\s+"([^"]+)"\s*,\s*(.+)/i)) {
+                        const match = line.match(/^WRITEFILE\s+"([^"]+)"\s*,\s*(.+)/i);
+                        jsCode += `writeFile("${match[1]}", ${match[2]});\n`;
+                    }
+                    else if (line.match(/^CLOSEFILE\s+"([^"]+)"/i)) {
+                        const match = line.match(/^CLOSEFILE\s+"([^"]+)"/i);
+                        jsCode += `closeFile("${match[1]}");\n`;
+                    }
+                    // -----------------------------------
+                    else if (line.match(/^IF\s+(.+)\s+THEN/i)) {
+                        let cond = line.match(/^IF\s+(.+)\s+THEN/i)[1];
+                        jsCode += `if (${parseCond(cond)}) {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^ELSE(\s|$)/i)) {
+                        jsCode += `} else {\n`;
+                    }
+                    else if (line.match(/^ENDIF/i)) {
+                        jsCode += `}\n`;
+                        openBlocks--;
+                    }
+                    // --- CASE OF Statement Transpilation ---
+                    else if (line.match(/^CASE\s+OF\s+([a-zA-Z0-9_]+)/i)) {
+                        const match = line.match(/^CASE\s+OF\s+([a-zA-Z0-9_]+)/i);
+                        jsCode += `switch (${match[1]}) {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^OTHERWISE\s+(.+)/i)) {
+                        const match = line.match(/^OTHERWISE\s+(.+)/i);
+                        jsCode += `default:\n`;
+                        // Insert the statement and a break command as the next lines to process!
+                        lines.splice(i + 1, 0, match[1], "break;");
+                    }
+                    else if (line.match(/^ENDCASE/i)) {
+                        jsCode += `}\n`;
+                        openBlocks--;
+                    }
+                    else if (line.match(/^('.*?'|".*?"|-?[0-9]+|[a-zA-Z0-9_]+)\s*:\s*(.+)/)) {
+                        // Matches a string, number, or variable case branch (e.g.,  1 : OUTPUT "Starting...")
+                        const match = line.match(/^('.*?'|".*?"|-?[0-9]+|[a-zA-Z0-9_]+)\s*:\s*(.+)/);
+                        jsCode += `case ${match[1]}:\n`;
+                        // Insert the statement and a break command as the next lines to process!
+                        lines.splice(i + 1, 0, match[2], "break;");
+                    }
+                    else if (line === "break;") {
+                        // Handle the invisible break commands we inject
+                        jsCode += "break;\n";
+                    }
+                    // ---------------------------------------
+                    else if (line.match(/^FOR\s+([a-zA-Z0-9_]+)\s*<-\s*(.+?)\s+TO\s+(.+)/i)) {
+                        const m = line.match(/^FOR\s+([a-zA-Z0-9_]+)\s*<-\s*(.+?)\s+TO\s+(.+)/i);
+                        jsCode += `for (${m[1]} = ${m[2]}; ${m[1]} <= ${m[3]}; ${m[1]}++) {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^NEXT\s+([a-zA-Z0-9_]+)/i)) {
+                        jsCode += `}\n`;
+                        openBlocks--;
+                    }
+                    else if (line.match(/^REPEAT/i)) {
+                        jsCode += `do {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^UNTIL\s+(.+)/i)) {
+                        let cond = line.match(/^UNTIL\s+(.+)/i)[1];
+                        jsCode += `} while (!(${parseCond(cond)}));\n`;
+                        openBlocks--;
+                    }
+                    else if (line.match(/^WHILE\s+(.+)\s+DO/i)) {
+                        let cond = line.match(/^WHILE\s+(.+)\s+DO/i)[1];
+                        jsCode += `while (${parseCond(cond)}) {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^ENDWHILE/i)) {
+                        jsCode += `}\n`;
+                        openBlocks--;
+                    }
+                    else if (line.match(/^(?:FUNCTION|PROCEDURE)\s+([a-zA-Z0-9_]+)\s*\((.*?)\)/i)) {
+                        const match = line.match(/^(?:FUNCTION|PROCEDURE)\s+([a-zA-Z0-9_]+)\s*\((.*?)\)/i);
+                        const funcName = match[1];
+                        // Strip out type definitions from parameters (e.g., "Fahrenheit : REAL" -> "Fahrenheit")
+                        const rawParams = match[2].split(',');
+                        const cleanParams = rawParams.map(p => p.split(':')[0].trim()).filter(p => p !== '').join(', ');
+                        jsCode += `async function ${funcName}(${cleanParams}) {\n`;
+                        openBlocks++;
+                    }
+                    else if (line.match(/^END(?:FUNCTION|PROCEDURE)/i)) {
+                        jsCode += `}\n`;
+                        openBlocks--;
+                    }
+                    else if (line.match(/^RETURN\s+(.+)/i)) {
+                        const match = line.match(/^RETURN\s+(.+)/i);
+                        jsCode += `return ${match[1]};\n`;
+                    }
+                    else if (line.match(/^CALL\s+([a-zA-Z0-9_]+)(?:\s*\((.*?)\))?/i)) {
+                        const match = line.match(/^CALL\s+([a-zA-Z0-9_]+)(?:\s*\((.*?)\))?/i);
+                        const args = match[2] ? match[2] : '';
+                        jsCode += `await ${match[1]}(${args});\n`;
+                    }
+                    else if (line.includes('<-')) { // Assignment
+                        let parts = line.split('<-');
+                        // Smart replace: handle MOD, DIV, and Boolean operators AND, OR, NOT
+                        let expr = parts[1].replace(/\bMOD\b(?!\s*\()/gi, '%')
+                                           .replace(/\bDIV\b(?!\s*\()/gi, '/')
+                                           .replace(/\bAND\b/gi, '&&')
+                                           .replace(/\bOR\b/gi, '||')
+                                           .replace(/\bNOT\b/gi, '!'); 
+                        // Wrap assignment expression in await to safely handle async function returns
+                        jsCode += `${parts[0].trim()} = await (${expr.trim()});\n`;
+                    }
+                    else {
+                        // Fallback/Unknown
+                        console.warn("Unrecognized line:", line);
+                    }
+                }
+
+                if (openBlocks > 0) {
+                    throw new SyntaxError("Missing an END statement (e.g., ENDIF, NEXT, ENDWHILE). Please check that all blocks are closed.");
+                } else if (openBlocks < 0) {
+                    throw new SyntaxError("Too many END statements. You have an extra ENDIF, NEXT, etc.");
+                }
+
+                // Wrap in dynamic AsyncFunction and execute
+                const AsyncFunction = Object.getPrototypeOf(async function(){}).constructor;
+                
+                // Pass helper functions and TRUE/FALSE constants into the execution scope
+                const executable = new AsyncFunction(
+                    'printToConsole', 'requestInput', 'openFile', 'readFile', 'writeFile', 'closeFile', 
+                    'RANDOM', 'ROUND', 'LENGTH', 'LCASE', 'UCASE', 'SUBSTRING', 'DIV', 'MOD', 
+                    'TRUE', 'FALSE', 'True', 'False', jsCode
+                );
+                
+                await executable(
+                    printToConsole, requestInput, openFile, readFile, writeFile, closeFile, 
+                    RANDOM, ROUND, LENGTH, LCASE, UCASE, SUBSTRING, DIV, MOD, 
+                    true, false, true, false
+                );
+
+                // Sync VFS back to UI for Data.txt in case the program wrote to it
+                if (vfs["data.txt"]) {
+                    document.getElementById('dataEditor').value = vfs["data.txt"].join('\n');
+                }
+
+            } catch (err) {
+                printToConsole(`[ERROR] ${err.name}: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
