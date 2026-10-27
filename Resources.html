@@ -108,8 +108,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
@@ -124,26 +131,31 @@
 
         <!-- Main Content Area with Glassmorphism -->
         <main class="w-full max-w-5xl mx-auto px-4 flex-grow">
-            
+
             <!-- Navigation Back to Home -->
             <div class="mb-6">
-                <a href="index.html" class="text-green-400 hover:text-yellow-300 transition-colors flex items-center gap-2 font-medium">
+                <a href="index.html"
+                    class="text-green-400 hover:text-yellow-300 transition-colors flex items-center gap-2 font-medium">
                     ← Back to Home
                 </a>
             </div>
 
             <div class="glass-panel rounded-3xl p-8 sm:p-12 text-center">
 
-                <h1 class="text-3xl sm:text-5xl font-bold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#39ff14] to-[#ffff00] drop-shadow-lg">
+                <h1
+                    class="text-3xl sm:text-5xl font-bold mb-4 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-[#39ff14] to-[#ffff00] drop-shadow-lg">
                     Computing Resources
                 </h1>
-                
-                <div class="w-24 h-1 bg-gradient-to-r from-green-500 to-yellow-400 mx-auto mb-10 rounded-full shadow-[0_0_10px_rgba(57,255,20,0.5)]"></div>
+
+                <div
+                    class="w-24 h-1 bg-gradient-to-r from-green-500 to-yellow-400 mx-auto mb-10 rounded-full shadow-[0_0_10px_rgba(57,255,20,0.5)]">
+                </div>
 
                 <!-- Tab Navigation Buttons -->
                 <div class="flex flex-wrap justify-center gap-4 mb-10 border-b border-green-900/50 pb-8">
                     <!-- The active tab uses the 'yellow-glow' class -->
-                    <button class="glossy-btn tab-btn yellow-glow px-8 py-3" onclick="openTab(event, 'ks3')">KS3</button>
+                    <button class="glossy-btn tab-btn yellow-glow px-8 py-3"
+                        onclick="openTab(event, 'ks3')">KS3</button>
                     <button class="glossy-btn tab-btn px-8 py-3" onclick="openTab(event, 'ks4')">KS4</button>
                     <button class="glossy-btn tab-btn px-8 py-3" onclick="openTab(event, 'ks5')">KS5</button>
                 </div>
@@ -152,7 +164,8 @@
                 <div id="ks3" class="tab-content" style="display: block;">
                     <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 3 Resources</h2>
                     <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Foundational computing resources for Years 7-9. Discover introductory programming, digital literacy, and basic computer science concepts.
+                        Foundational computing resources for Years 7-9. Discover introductory programming, digital
+                        literacy, and basic computer science concepts.
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         <!-- Placeholder Buttons for KS3 -->
@@ -167,7 +180,8 @@
                 <div id="ks4" class="tab-content">
                     <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 4 (GCSE) Resources</h2>
                     <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Core materials tailored for GCSE Computer Science. Explore algorithms, data representation, and intermediate programming challenges.
+                        Core materials tailored for GCSE Computer Science. Explore algorithms, data representation, and
+                        intermediate programming challenges.
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         <!-- Placeholder Buttons for KS4 -->
@@ -183,12 +197,13 @@
                 <div id="ks5" class="tab-content">
                     <h2 class="text-2xl font-semibold text-yellow-300 mb-4">Key Stage 5 (A Level & IB) Resources</h2>
                     <p class="text-gray-300 mb-8 max-w-2xl mx-auto">
-                        Advanced computing resources for A Level and IB students. Deep dives into complex data structures, object-oriented programming, and NEA project support.
+                        Advanced computing resources for A Level and IB students. Deep dives into complex data
+                        structures, object-oriented programming, and NEA project support.
                     </p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                         <!-- Placeholder Buttons for KS5 -->
                         <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">OOP in C#</a>
-                        <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Data Structures</a>
+                        <a href="Mr.Ks-Pile-O-80s-Tiles.html" class="glossy-btn !px-4 !py-3 !text-sm">Data Structures</a>
                         <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">NEA Project Planning</a>
                         <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Assembly Language</a>
                         <a href="#" class="glossy-btn !px-4 !py-3 !text-sm">Boolean Algebra</a>
@@ -225,5 +240,4 @@
         }
     </script>
 </body>
-
 </html>
