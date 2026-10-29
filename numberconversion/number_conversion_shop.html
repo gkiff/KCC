@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Conversion - All Numbers & Values Transformed</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Bangers&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --comic-border: 4px solid #000;
+        }
+        
+        body {
+            font-family: 'Comic Neue', cursive;
+            background-color: #fdf6e3;
+            background-image: radial-gradient(#d3c9b3 20%, transparent 20%);
+            background-size: 10px 10px;
+        }
+
+        h1, h2, h3, .bangers-font {
+            font-family: 'Bangers', cursive;
+            letter-spacing: 1px;
+        }
+
+        .comic-panel {
+            background-color: #fff;
+            border: var(--comic-border);
+            box-shadow: 6px 6px 0px #000;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .speech-bubble {
+            position: relative;
+            background: #fff;
+            border: 3px solid #000;
+            border-radius: 12px;
+            padding: 12px;
+            margin: 10px;
+            box-shadow: 3px 3px 0px rgba(0,0,0,0.2);
+            font-weight: bold;
+        }
+
+        .speech-bubble::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 20px;
+            border-width: 10px 10px 0;
+            border-style: solid;
+            border-color: #000 transparent transparent;
+            display: block;
+            width: 0;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 22px;
+            border-width: 8px 8px 0;
+            border-style: solid;
+            border-color: #fff transparent transparent;
+            display: block;
+            width: 0;
+        }
+        
+        .bubble-right::before {
+            left: auto;
+            right: 20px;
+        }
+        .bubble-right::after {
+            left: auto;
+            right: 22px;
+        }
+
+        .btn-comic {
+            background-color: #ffd166;
+            border: 3px solid #000;
+            box-shadow: 3px 3px 0px #000;
+            font-family: 'Bangers', cursive;
+            transition: all 0.1s;
+        }
+        .btn-comic:active {
+            transform: translate(3px, 3px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        
+        .nav-active {
+            background-color: #ef476f !important;
+            color: white;
+        }
+
+        .character-icon {
+            font-size: 3rem;
+            filter: drop-shadow(2px 2px 0px #000);
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-900 pb-12">
+
+    <!-- Header -->
+    <header class="bg-blue-400 border-b-4 border-black p-4 text-center sticky top-0 z-50 shadow-md">
+        <h1 class="text-4xl md:text-5xl text-white" style="text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;">
+            🏪 Number Conversion Shop 🏪
+        </h1>
+        <p class="bangers-font text-xl text-yellow-300 tracking-wider" style="text-shadow: 1px 1px 0 #000;">
+            All Numbers & Values Transformed!
+        </p>
+    </header>
+
+    <main class="max-w-5xl mx-auto mt-8 px-4">
+        
+        <!-- Navigation -->
+        <nav class="grid grid-cols-2 md:grid-cols-3 gap-3 mb-8">
+            <button onclick="showSection('d2b')" id="nav-d2b" class="btn-comic bg-white text-xl py-2 px-4 rounded">Denary to Binary</button>
+            <button onclick="showSection('b2d')" id="nav-b2d" class="btn-comic bg-white text-xl py-2 px-4 rounded">Binary to Denary</button>
+            <button onclick="showSection('h2d')" id="nav-h2d" class="btn-comic bg-white text-xl py-2 px-4 rounded">Hex to Denary</button>
+            <button onclick="showSection('d2h')" id="nav-d2h" class="btn-comic bg-white text-xl py-2 px-4 rounded">Denary to Hex</button>
+            <button onclick="showSection('h2b')" id="nav-h2b" class="btn-comic bg-white text-xl py-2 px-4 rounded">Hex to Binary</button>
+            <button onclick="showSection('n2tc')" id="nav-n2tc" class="btn-comic bg-white text-xl py-2 px-4 rounded text-sm md:text-xl leading-tight">Negative to 8-Bit Two's Comp</button>
+        </nav>
+
+        <!-- Content Sections -->
+        <div id="content-container">
+            <!-- Sections will be toggled via JS -->
+            
+            <!-- Denary to Binary -->
+            <section id="sec-d2b" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="comic-panel bg-yellow-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble mb-4 self-start max-w-[80%]">
+                            Welcome! To turn Denary into Binary, keep dividing the number by 2 and write down the remainders!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon">👨‍🔬</span>
+                            <span class="ml-2 font-bold text-lg">Colin Version</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-blue-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble bubble-right mb-4 self-end max-w-[80%] bg-blue-50">
+                            So, 13 ÷ 2 is 6 remainder 1. Then 6 ÷ 2 is 3 remainder 0... I see!
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <span class="mr-2 font-bold text-lg">Laurie</span>
+                            <span class="character-icon">👧</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-green-100 p-4 flex flex-col justify-end min-h-[250px] md:col-span-2">
+                        <div class="speech-bubble mb-4 self-start max-w-[50%] bg-green-50">
+                            Read the remainders from bottom to top, kid! 13 becomes 1101!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon" style="transform: scaleX(-1);">🦎</span>
+                            <span class="ml-2 font-bold text-lg">Xor</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Binary to Denary -->
+            <section id="sec-b2d" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="comic-panel bg-pink-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble mb-4 self-start max-w-[90%]">
+                            Binary uses place values: 1, 2, 4, 8, 16... doubling right to left!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon">👨‍🔬</span>
+                            <span class="ml-2 font-bold text-lg">Colin Version</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-purple-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble bubble-right mb-4 self-end max-w-[90%] bg-purple-50">
+                            For 1011, I add the values where there's a 1: 8 + 2 + 1 = 11! Splendid!
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <span class="mr-2 font-bold text-lg">Laurie</span>
+                            <span class="character-icon">👧</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hex to Denary -->
+            <section id="sec-h2d" class="hidden">
+                <div class="grid grid-cols-1 gap-6 mb-6">
+                    <div class="comic-panel bg-orange-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="flex flex-col md:flex-row gap-4 items-end">
+                            <div class="flex-1">
+                                <div class="speech-bubble mb-4 self-start bg-white">
+                                    Hexadecimal uses base 16. The columns are 1, 16, 256... and A-F stand for 10-15!
+                                </div>
+                                <div class="flex items-end">
+                                    <span class="character-icon">👨‍🔬</span>
+                                    <span class="ml-2 font-bold text-lg">Colin Version</span>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <div class="speech-bubble bubble-right mb-4 self-end bg-orange-50">
+                                    So '2B' is (2 × 16) + (11 × 1) = 32 + 11 = 43!
+                                </div>
+                                <div class="flex items-end justify-end">
+                                    <span class="mr-2 font-bold text-lg">Laurie</span>
+                                    <span class="character-icon">👧</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Denary to Hex -->
+            <section id="sec-d2h" class="hidden">
+                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="comic-panel bg-teal-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble mb-4 self-start max-w-[90%]">
+                            Successive division by 16! If the remainder is 10 to 15, use A to F!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon">👨‍🔬</span>
+                            <span class="ml-2 font-bold text-lg">Colin Version</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-indigo-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble bubble-right mb-4 self-end max-w-[90%] bg-indigo-50">
+                            158 ÷ 16 = 9 remainder 14. 14 is E, so it becomes 9E!
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <span class="mr-2 font-bold text-lg">Laurie</span>
+                            <span class="character-icon">👧</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Hex to Binary -->
+            <section id="sec-h2b" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="comic-panel bg-red-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble mb-4 self-start max-w-[90%]">
+                            Split the Hex into digits, and convert each to a 4-bit Binary group!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon">👨‍🔬</span>
+                            <span class="ml-2 font-bold text-lg">Colin Version</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-rose-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble bubble-right mb-4 self-end max-w-[90%] bg-rose-50">
+                            For D9, D is 13 (1101) and 9 is (1001). So it's 11011001!
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <span class="mr-2 font-bold text-lg">Laurie</span>
+                            <span class="character-icon">👧</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-stone-200 p-4 flex flex-col justify-end min-h-[150px] md:col-span-2">
+                        <div class="speech-bubble mb-4 self-start max-w-[50%] bg-stone-50">
+                            Two for the price of one. Efficient.
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon" style="transform: scaleX(-1);">🦎</span>
+                            <span class="ml-2 font-bold text-lg">Xor</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Negative to 8-Bit Two's Complement -->
+            <section id="sec-n2tc" class="hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div class="comic-panel bg-cyan-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble mb-4 self-start max-w-[90%]">
+                            In 8-bit Two's Complement, the far-left bit is worth -128! To convert a negative, invert the positive binary bits and add 1! Or find what adds to -128!
+                        </div>
+                        <div class="flex items-end">
+                            <span class="character-icon">👨‍🔬</span>
+                            <span class="ml-2 font-bold text-lg">Colin Version</span>
+                        </div>
+                    </div>
+                    <div class="comic-panel bg-sky-100 p-4 flex flex-col justify-end min-h-[250px]">
+                        <div class="speech-bubble bubble-right mb-4 self-end max-w-[90%] bg-sky-50">
+                            So -84 is -128 + 32 + 8 + 4 = 10101100! Incredible!
+                        </div>
+                        <div class="flex items-end justify-end">
+                            <span class="mr-2 font-bold text-lg">Laurie</span>
+                            <span class="character-icon">👧</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interactive Quiz Section (Shared) -->
+            <div class="comic-panel bg-white p-6 mt-8 mb-12 border-8 border-black">
+                <h2 class="text-3xl mb-4 text-center border-b-4 border-dashed border-gray-300 pb-2">🎯 Test Your Skills!</h2>
+                
+                <div class="flex flex-col items-center">
+                    <p id="quiz-question" class="text-2xl font-bold mb-6 text-center text-blue-700">Loading question...</p>
+                    
+                    <div class="flex flex-col md:flex-row gap-4 w-full max-w-lg">
+                        <input type="text" id="quiz-input" class="flex-1 border-4 border-black p-3 text-xl rounded uppercase" placeholder="Your answer here..." autocomplete="off">
+                        <button onclick="checkAnswer()" class="btn-comic bg-green-400 text-2xl py-2 px-6 rounded">Check!</button>
+                    </div>
+
+                    <div id="quiz-feedback" class="mt-6 text-xl font-bold min-h-[60px] text-center w-full flex items-center justify-center p-4 rounded border-4 border-transparent">
+                        <!-- Feedback goes here -->
+                    </div>
+
+                    <button onclick="generateQuestion()" id="next-btn" class="btn-comic bg-blue-400 text-white text-xl py-2 px-8 rounded mt-4 hidden">Next Question ➡️</button>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // State
+        let currentTopic = 'd2b';
+        let currentAnswer = '';
+        
+        // Character Snark/Cheers
+        const colinCheers = ["Splendid!", "Fabulous work!", "Spot on!", "That's amazing!", "Magnificent!"];
+        const xorSnarks = ["Finally, some logic.", "Not bad... for a human.", "A broken clock is right twice a day.", "I could have computed that faster.", "Correct. Have a fruit fly."];
+        const failMessages = ["Not quite! Try again!", "Check your workings, friend!", "Hmm, let's rethink that one."];
+
+        const topics = ['d2b', 'b2d', 'h2d', 'd2h', 'h2b', 'n2tc'];
+
+        function showSection(sectionId) {
+            // Update Navigation UI
+            topics.forEach(t => {
+                document.getElementById('sec-' + t).classList.add('hidden');
+                document.getElementById('nav-' + t).classList.remove('nav-active');
+            });
+            
+            document.getElementById('sec-' + sectionId).classList.remove('hidden');
+            document.getElementById('nav-' + sectionId).classList.add('nav-active');
+            
+            currentTopic = sectionId;
+            generateQuestion();
+        }
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateQuestion() {
+            // Reset UI
+            document.getElementById('quiz-input').value = '';
+            const feedbackEl = document.getElementById('quiz-feedback');
+            feedbackEl.innerHTML = '';
+            feedbackEl.className = 'mt-6 text-xl font-bold min-h-[60px] text-center w-full flex items-center justify-center p-4 rounded border-4 border-transparent';
+            document.getElementById('next-btn').classList.add('hidden');
+
+            let qText = "";
+            let num = 0;
+
+            switch(currentTopic) {
+                case 'd2b':
+                    num = getRandomInt(1, 255);
+                    qText = `Convert Denary <b>${num}</b> to Binary`;
+                    currentAnswer = num.toString(2);
+                    break;
+                case 'b2d':
+                    num = getRandomInt(1, 255);
+                    let binStr = num.toString(2);
+                    qText = `Convert Binary <b>${binStr}</b> to Denary`;
+                    currentAnswer = num.toString(10);
+                    break;
+                case 'h2d':
+                    num = getRandomInt(1, 255);
+                    let hexStr = num.toString(16).toUpperCase();
+                    qText = `Convert Hexadecimal <b>${hexStr}</b> to Denary`;
+                    currentAnswer = num.toString(10);
+                    break;
+                case 'd2h':
+                    num = getRandomInt(1, 255);
+                    qText = `Convert Denary <b>${num}</b> to Hexadecimal`;
+                    currentAnswer = num.toString(16).toUpperCase();
+                    break;
+                case 'h2b':
+                    num = getRandomInt(1, 255);
+                    let hStr = num.toString(16).toUpperCase();
+                    qText = `Convert Hexadecimal <b>${hStr}</b> to Binary`;
+                    // Pad to 8 bits for consistency in typical problems, or multiple of 4
+                    let bStr = num.toString(2);
+                    if(bStr.length <= 4 && hStr.length === 1) {
+                        currentAnswer = bStr.padStart(4, '0');
+                    } else {
+                        currentAnswer = bStr.padStart(8, '0');
+                    }
+                    // Allow unpadded binary as well in validation
+                    currentAnswerAlt = bStr; 
+                    break;
+                case 'n2tc':
+                    num = getRandomInt(-128, -1);
+                    qText = `Convert Denary <b>${num}</b> to 8-Bit Two's Complement Binary`;
+                    // Math logic: 256 + negative number gives the unsigned integer representation of the 8-bit two's complement.
+                    currentAnswer = (256 + num).toString(2).padStart(8, '0');
+                    break;
+            }
+
+            document.getElementById('quiz-question').innerHTML = qText;
+            
+            // Focus input
+            document.getElementById('quiz-input').focus();
+        }
+
+        function checkAnswer() {
+            let userInput = document.getElementById('quiz-input').value.trim().toUpperCase().replace(/\s/g, ''); // Remove spaces
+            const feedbackEl = document.getElementById('quiz-feedback');
+            
+            if (userInput === '') return;
+
+            let isCorrect = (userInput === currentAnswer);
+            
+            // Special case for Hex to Binary padding
+            if (currentTopic === 'h2b' && typeof currentAnswerAlt !== 'undefined') {
+                if (userInput === currentAnswerAlt) isCorrect = true;
+            }
+            // For Binary inputs, allow padded or unpadded except for 8-bit Two's complement which must be 8 bits
+            if (currentTopic === 'd2b') {
+                if (parseInt(userInput, 2) === parseInt(currentAnswer, 2)) isCorrect = true;
+            }
+
+            if (isCorrect) {
+                let cheer = Math.random() > 0.5 
+                    ? `👨‍🔬 Colin: "${colinCheers[Math.floor(Math.random() * colinCheers.length)]}"`
+                    : `🦎 Xor: "${xorSnarks[Math.floor(Math.random() * xorSnarks.length)]}"`;
+                
+                feedbackEl.innerHTML = `<span class="text-green-700">Correct! ${cheer}</span>`;
+                feedbackEl.className = 'mt-6 text-xl font-bold min-h-[60px] text-center w-full flex items-center justify-center p-4 rounded border-4 border-green-500 bg-green-100';
+                document.getElementById('next-btn').classList.remove('hidden');
+            } else {
+                feedbackEl.innerHTML = `<span class="text-red-700">❌ ${failMessages[Math.floor(Math.random() * failMessages.length)]}</span>`;
+                feedbackEl.className = 'mt-6 text-xl font-bold min-h-[60px] text-center w-full flex items-center justify-center p-4 rounded border-4 border-red-500 bg-red-100';
+                
+                // Shake effect on input
+                const inputEl = document.getElementById('quiz-input');
+                inputEl.classList.add('translate-x-2');
+                setTimeout(() => inputEl.classList.remove('translate-x-2'), 100);
+                setTimeout(() => inputEl.classList.add('-translate-x-2'), 200);
+                setTimeout(() => inputEl.classList.remove('-translate-x-2'), 300);
+            }
+        }
+
+        // Allow pressing Enter to check answer
+        document.getElementById('quiz-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                if(document.getElementById('next-btn').classList.contains('hidden')) {
+                    checkAnswer();
+                } else {
+                    generateQuestion();
+                }
+            }
+        });
+
+        // Initialize first section on load
+        showSection('d2b');
+    </script>
+</body>
+</html>
